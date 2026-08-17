@@ -23,6 +23,11 @@ jobs:
       - name: Test Code
         run: go test -v ./...
 
+      # ШАГ-ИСПРАВЛЕНИЕ: Переводим имя репозитория в lowercase силами самого Bash
+      - name: Set lower case repo name
+        run: |
+          echo "IMAGE_NAME=ghcr.io/${GITHUB_REPOSITORY@L}" >> $GITHUB_ENV
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -35,8 +40,8 @@ jobs:
         with:
           context: .
           push: true
-          # Используем встроенную функцию ${{ format(...) }} и фукнцию string.lowercase для принудительного нижнего регистра
+          # Теперь безопасно используем переменную, которую создал Bash на предыдущем шаге
           tags: |
-            ghcr.io/${{ text.toLower(github.repository) }}:latest
-            ghcr.io/${{ text.toLower(github.repository) }}:${{ github.sha }}
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:${{ github.sha }}
 
